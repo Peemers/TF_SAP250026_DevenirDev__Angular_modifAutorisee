@@ -14,3 +14,6 @@ L'application doit contenir les champs suivants:
 - URL de la photo de profil (optionnel)
 
 Vous avez carte blanche pour le style visuel de la page HTML.
+
+Pour rappel:
+- Création d'un composant : `ng g c chemin/nom-du-composant`
