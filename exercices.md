@@ -1,6 +1,6 @@
 # Exercices
 
-# Exercice 01 - Créer son profil
+## Exercice 01 - Créer son profil
 
 > features/exercices/exo01
 
@@ -17,3 +17,14 @@ Vous avez carte blanche pour le style visuel de la page HTML.
 
 Pour rappel:
 - Création d'un composant : `ng g c chemin/nom-du-composant`
+
+## Exercice 02 - Créer son profil dynamique
+
+> features/exercices/exo02
+
+Vous devez créer une application séparée en deux parties.
+
+La partie de gauche affiche un formulaire reprenant les informations du premier exercices.
+La partie de droite affiche l'équivalent de l'exercice 1 par rapport aux données entrées à gauche.
+
+La complétion du profil doit se faire en instantanée.
