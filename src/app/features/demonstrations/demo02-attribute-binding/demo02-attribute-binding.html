@@ -1,0 +1,25 @@
+<h2>Démonstration 02 - Attribute Binding</h2>
+
+<p>Permet de reprendre une valeur d'une propriété de la classe du composant, ensuite l'utiliser comme valeur d'un attribut d'une balise.</p>
+
+<h3>Syntaxe: </h3>
+<code ngNonBindable>
+  &lt;balise [attribut]="propriété" &gt;&lt;/balise&gt;
+</code>
+
+<hr>
+
+<h3>Exemple: </h3>
+
+<div>
+  <label for="userInput">Valeur:</label>
+  <input [type]="showPassword ? 'text' : 'password'" name="" id="" [value]="password">
+</div>
+
+<p>Afficher le mot de passe: 
+  <input type="checkbox" name="" id="" [checked]="showPassword">
+</p>
+
+<div>
+  <img [src]="urlImage" [alt]="altImage" [width]="widthImage">
+</div>

@@ -1,11 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { Home } from "./features/home/home";
-import { Demo01Interpolation } from "./features/demonstrations/demo01-interpolation/demo01-interpolation";
-import { Exo01 } from "./features/exercices/exo01/exo01";
+import { Demo02AttributeBinding } from "./features/demonstrations/demo02-attribute-binding/demo02-attribute-binding";
 
 @Component({
   selector: 'app-root',
-  imports: [Home, Demo01Interpolation, Exo01],
+  imports: [Demo02AttributeBinding],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
