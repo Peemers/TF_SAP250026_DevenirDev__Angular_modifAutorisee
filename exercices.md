@@ -2,6 +2,8 @@
 
 # Exercice 01 - Créer son profil
 
+> features/exercices/exo01
+
 Vous devez créer une application pour permettre aux utilisateurs de créer leur propre profil personnel.
 L'application doit contenir les champs suivants: 
 - Nom complet
