@@ -1,0 +1,60 @@
+<h2>Exercice 02 - Créer son profil dynamique</h2>
+
+<div class="container">
+
+  <div class="formulaire">
+    <h3>Formulaire</h3>
+
+    <div class="fields">
+
+      <!-- - Nom complet
+      - Adresse email
+      - Date de naissance
+      - Genre
+      - Langues parlées
+      - URL de la photo de profil (optionnel) -->
+
+      <label for="">Nom complet: </label>
+      <input type="text" [(ngModel)]="nomComplet">
+
+      <label for="">Email: </label>
+      <input type="email" [(ngModel)]="email">
+
+      <label for="">Date de naissance: </label>
+      <input type="date" [(ngModel)]="dateNaissance">
+
+      <label for="">Genre: </label>
+      <select [(ngModel)]="genre">
+        <option value="M">Homme</option>
+        <option value="F">Femme</option>
+        <option value="X">Autre</option>
+      </select>
+
+      <label for="">Langues: (séparée par une virgule)</label>
+      <input type="text" [(ngModel)]="langues">
+
+      <label for="">URL de la photo: </label>
+      <input type="url" [(ngModel)]="url">
+
+    </div>
+
+  </div>
+
+  <div class="profil">
+    <h3>Profil</h3>
+
+    <div>
+      <img [src]="url" alt="Photo de profil de {{ nomComplet }}" width="250">
+
+      <p>{{ genre === "M" ? "Monsieur" : (genre === "F" ? "Madame" : "") }} {{ nomComplet }}</p>
+
+      <p>Email: <a href="mailto:{{email}}">{{email}}</a></p>
+
+      <p>Date de naissance: {{ dateNaissance }}</p>
+
+      <p>Langues parlées: {{ langues }}</p>
+    </div>
+
+  </div>
+
+</div>

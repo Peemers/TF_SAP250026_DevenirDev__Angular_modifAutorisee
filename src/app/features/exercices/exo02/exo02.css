@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid black;
+}
+
+.formulaire {
+  width: 50%;
+  border: 1px solid black;
+  height: 600px;
+  padding: 0 10px;
+}
+
+.fields > * {
+  display: block;
+}
+
+.fields input, .fields select {
+  margin: 5px 0 20px;
+}
+
+.profil {
+  width: 50%;
+  border: 1px solid black;
+  height: 600px;
+  padding: 0 10px;
+}
+
+@media screen and (max-width: 600px) {
+  .container {
+    flex-direction: column-reverse;
+  }
+  .formulaire, .profil {
+    width: 100%;
+  }
+}
