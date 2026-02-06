@@ -1,0 +1,21 @@
+<h2>Exercice 01 - Créer son profil</h2>
+
+<!-- 💩 -->
+<!-- <img src="{{ urlPhoto }}" alt="Photo de profil de {{ nomComplet }}"> -->
+
+<!-- ❤️ -->
+<img [src]="urlPhoto" alt="Photo de profil de {{ nomComplet }}">
+
+<p>{{ genre === "M" ? "Monsieur" : (genre === "F" ? "Madame" : "") }} {{ nomComplet }}</p>
+
+<p>Email: <a href="mailto:{{email}}">{{email}}</a></p>
+
+<p>Date de naissance: {{ dateNaissance.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) }}</p>
+
+<p>Langues parlées: {{ langues.join(", ") }}</p>
+<ul>
+  <li>{{langues[0]}}</li>
+  <li>{{langues[1]}}</li>
+  <li>{{langues[2]}}</li>
+  <li>{{langues[3]}}</li>
+</ul>
