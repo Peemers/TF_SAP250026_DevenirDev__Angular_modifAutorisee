@@ -28,3 +28,9 @@ La partie de gauche affiche un formulaire reprenant les informations du premier 
 La partie de droite affiche l'équivalent de l'exercice 1 par rapport aux données entrées à gauche.
 
 La complétion du profil doit se faire en instantanée.
+
+## Exercice 03 - Le chronomètre basique
+
+Vous devez créer une application qui permet de gérer un chronomètre.
+Vous pouvez : démarrer, mettre sur pause et reset le chronomètre.
+Astuce: cherchez du côté du setInterval
