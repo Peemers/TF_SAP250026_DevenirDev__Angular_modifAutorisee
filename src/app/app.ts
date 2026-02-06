@@ -6,10 +6,11 @@ import { Home } from "./features/home/home";
 import { Demo01Interpolation } from "./features/demonstrations/demo01-interpolation/demo01-interpolation";
 import { Exo01 } from "./features/exercices/exo01/exo01";
 import { Exo02 } from "./features/exercices/exo02/exo02";
+import { Exo03 } from "./features/exercices/exo03/exo03";
 
 @Component({
   selector: 'app-root',
-  imports: [Demo04TwowayBinding, Home, Demo01Interpolation, Exo01, Demo02AttributeBinding, Demo03EventBinding, Exo02],
+  imports: [Demo04TwowayBinding, Home, Demo01Interpolation, Exo01, Demo02AttributeBinding, Demo03EventBinding, Exo02, Exo03],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
