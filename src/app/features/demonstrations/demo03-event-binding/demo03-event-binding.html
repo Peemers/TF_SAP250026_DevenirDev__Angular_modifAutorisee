@@ -1,0 +1,23 @@
+<h2>Démonstration 03 - Event Binding</h2>
+
+<p>Permet de lier à un événement JS, une méthode définie dans la classe du composant.</p>
+
+<h3>Syntaxe: </h3>
+<code ngNonBindable>
+  &lt;balise (event)="methode()" &gt;&lt;/balise&gt;
+</code>
+
+<hr>
+
+<div>
+  <p>Compteur: {{ compteur }}</p>
+
+  <p>clic gauche: incrémenter</p>
+  <p>clic droit: décrémenter</p>
+  <button (click)="increase()" (contextmenu)="decrease($event)">➕ / ➖</button>
+</div>
+
+<div>
+  <label>Prénom: {{ firstname }}</label> <br>
+  <input type="text" name="" id="" [value]="firstname" (input)="updateValue($event)">
+</div>
