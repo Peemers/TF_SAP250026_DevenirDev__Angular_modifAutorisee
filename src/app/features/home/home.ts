@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -9,6 +9,17 @@ import { Component } from '@angular/core';
   `,
   styles: `h2 { color: darkgrey; }`
 })
-export class Home {
+export class Home implements OnInit, OnDestroy {
+  
   title: string = "Accueil";
+
+  ngOnInit(): void {
+    console.log("Initialisation du composant Home");
+  }
+
+  ngOnDestroy(): void {
+    console.log("Destruction du composant Home");
+  }
+
+
 }
