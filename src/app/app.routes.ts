@@ -28,7 +28,11 @@ export const routes: Routes = [
       .then(r => r.routes)
   },
 
-
+  {
+    path: 'exercices',
+    loadChildren: () => import("./features/exercices/exercices.routes")
+      .then(r => r.routes)
+  },
 
   {
     path: '**',
