@@ -90,6 +90,9 @@
           },
           "defaultConfiguration": "development"
         }
+      },
+      "i18n": {
+        "sourceLocale" : "fr-BE"
       }
     }
   }

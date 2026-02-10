@@ -1,0 +1,64 @@
+<h2>Démonstration 06 - Les pipes (intégrés)</h2>
+
+<h3>Syntaxe: </h3>
+<code ngNonBindable>
+  {{ expression | nomPipe }}
+</code>
+
+<h3>Exemples</h3>
+
+<h4>Chaînes de caractères:</h4>
+
+<ul>
+  <li>lowerCasePipe: {{ "couCou Les petitS LOUpS" | lowercase }}</li>
+  <li>upperCasePipe: {{ "couCou Les petitS LOUpS" | uppercase }}</li>
+  <li>titleCasePipe: {{ "couCou Les petitS LOUpS" | titlecase }}</li>
+</ul>
+
+<h4>Nombres:</h4>
+
+<ul>
+  <li>currencyPipe: {{ 1234.56 }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'JPY' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'symbol' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'symbol-narrow' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'code' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'symbol' : '6.1-1' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'code' : '1.2-2' : 'fr-BE' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'JPY' : 'symbol' : '' : 'ja-JP' }}</li>
+</ul>
+
+<p>Pareil pour DecimalPipe et PercentPipe. (plus simple: digitsInfo + locale)</p>
+
+<h4>Date:</h4>
+
+<ul>
+  <li>datePipe: {{ now }}</li>
+  <li>datePipe: {{ now | date }}</li>
+  <li>datePipe: {{ now | date : 'dd/MM/yyyy HH:mm:ss' }}</li>
+  <li>datePipe: {{ now | date : 'short' }}</li>
+  <li>datePipe: {{ now | date : 'dd/MM/yyyy HH:mm:ss' : '+0230' }}</li>
+  <li>datePipe: {{ now | date : 'EEEE dd MMMM yyyy HH:mm:ss' : '' : 'ja' }}</li>
+</ul>
+
+<h4>JSon:</h4>
+
+<ul>
+  <li>jsonPipe: {{ personne | json }}</li>
+</ul>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
