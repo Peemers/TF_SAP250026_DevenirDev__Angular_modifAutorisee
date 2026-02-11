@@ -1,0 +1,7 @@
+<h2>Exercice 05 - Le chronomètre formaté</h2>
+
+<p>Chrono: {{ chrono() | chrono }}</p>
+
+<button (click)="startChrono()" [disabled]="timer">Démarrer</button>
+<button (click)="stopChrono()" [disabled]="!timer">Mettre en pause</button>
+<button (click)="resetChrono()" [disabled]="!chrono()">Réinitialiser</button>

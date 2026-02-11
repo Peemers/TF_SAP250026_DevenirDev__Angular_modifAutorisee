@@ -1,0 +1,29 @@
+<h2>Exercice 06 - Convertisseur de degré</h2>
+
+
+<div>
+  <label for="temp">Température</label>
+  <input type="number" name="temp" id="temp" [(ngModel)]="temp">
+</div>
+
+<div>
+  <label for="source">Source:</label>
+  <select name="source" id="source" [(ngModel)]="unitSrc">
+    <option value="celsius">Celsius</option>
+    <option value="fahrenheit">Fahrenheit</option>
+    <option value="kelvin">Kelvin</option>
+  </select>
+</div>
+
+<div>
+  <label for="destination">Destination:</label>
+  <select name="destination" id="destination" [(ngModel)]="unitDest">
+    <option value="celsius">Celsius</option>
+    <option value="fahrenheit">Fahrenheit</option>
+    <option value="kelvin">Kelvin</option>
+  </select>
+</div>
+
+<div>
+  <p>{{ temp() | temperature : unitSrc() : unitDest() }}</p>
+</div>

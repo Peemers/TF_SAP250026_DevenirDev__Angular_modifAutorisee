@@ -20,5 +20,15 @@ export const routes: Routes = [
     path: 'exo03',
     loadComponent: () => import("./exo03/exo03")
       .then(c => c.Exo03)
-  }
+  },
+  {
+    path: 'exo05',
+    loadComponent: () => import("./exo05/exo05")
+      .then(c => c.Exo05)
+  },
+  {
+    path: 'exo06',
+    loadComponent: () => import("./exo06/exo06")
+      .then(c => c.Exo06)
+  },
 ];

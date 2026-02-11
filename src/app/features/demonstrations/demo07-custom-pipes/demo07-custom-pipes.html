@@ -3,7 +3,9 @@
 <h3>Exemple:</h3>
 
 <h4>Convert To DHMS Pipe:</h4>
-<p>Valeur: {{ time }} → valeur convertie: {{ time | convertToDhms }}</p>
+<p>Valeur d'origine: {{ time }} </p>
+<p>Valeur convertie: {{ time | convertToDhms }}</p>
 
 <h4>Sum</h4>
-<p>Valeurs: {{ values | sum : 0}}</p>
+<p>Valeurs d'origine: {{ values }}</p>
+<p>Somme: {{ values | sum : 0}}</p>
