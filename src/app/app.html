@@ -1,17 +1,19 @@
-<div class="container">
+<div class="container-fluid">
 
-  <div class="menu">
-    <app-navbar />
-  </div>
-
-  <main>
-    
-    <div class="header"></div>
-    <div class="content">
-      <router-outlet />
+  <div class="row">
+    <div class="menu col-3">
+      <app-navbar />
     </div>
-    <div class="footer"></div>
-
-  </main>
+  
+    <main class="col">
+      
+      <div class="header"></div>
+      <div class="content">
+        <router-outlet />
+      </div>
+      <div class="footer"></div>
+  
+    </main>
+  </div>
 
 </div>
