@@ -1,0 +1,21 @@
+<h2>Démonstration 09 - Les directives structurelles</h2>
+
+<h3>Directive *ngIf</h3>
+
+<h4>Ancienne version (⚠️ retiré en Angular V22)</h4>
+
+<button (click)="toggleShowed()">Montrer / Cacher</button>
+
+<p *ngIf="isShowed">
+  Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro animi dolore quibusdam? Ad id ipsa sed iure cum dolore
+  dolorem veritatis, amet, voluptas eos possimus tempora praesentium illo mollitia a?
+</p>
+
+<h4>Nouvelle version (⚠️ à partir de la V18)</h4>
+
+@if (isShowed) {
+<p>
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatem nobis aperiam autem, quaerat, corporis rem quae
+  tempora a exercitationem, quam delectus sit! Dolor molestiae quod dolorem officiis ab quisquam cumque!
+</p>
+}
