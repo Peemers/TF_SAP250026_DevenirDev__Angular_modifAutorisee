@@ -6,6 +6,24 @@ Ce guide vous accompagne dans la recréation complète du projet Angular vu en f
 
 ---
 
+## Problème de scripts désactivés (Windows)
+
+Si vous rencontrez l'erreur suivante lors de l'exécution de commandes Angular CLI :
+
+```
+ng : Impossible de charger le fichier C:\Users\...\npm\ng.ps1, car l'exécution de scripts est désactivée sur ce système.
+```
+
+Exécutez cette commande **en tant qu'administrateur** dans PowerShell :
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Puis fermez et rouvrez votre terminal.
+
+---
+
 ## Table des matières
 
 1. [Prérequis](#1---prérequis)
@@ -20,7 +38,14 @@ Ce guide vous accompagne dans la recréation complète du projet Angular vu en f
 10. [Exercice 01 - Profil statique](#10---exercice-01---profil-statique)
 11. [Exercice 02 - Profil dynamique](#11---exercice-02---profil-dynamique)
 12. [Exercice 03 - Chronomètre avec Signals](#12---exercice-03---chronomètre-avec-signals)
-13. [Récapitulatif des notions](#13---récapitulatif-des-notions)
+13. [Démo 05 - Le Routing](#13---démo-05---le-routing)
+14. [Démo 06 - Les Pipes intégrés](#14---démo-06---les-pipes-intégrés)
+15. [Démo 07 - Les Custom Pipes](#15---démo-07---les-custom-pipes)
+16. [Exercice 05 - Chronomètre formaté](#16---exercice-05---chronomètre-formaté)
+17. [Exercice 06 - Convertisseur de température](#17---exercice-06---convertisseur-de-température)
+18. [Démo 08 - Les directives de composant](#18---démo-08---les-directives-de-composant)
+19. [Démo 09 - Les directives structurelles](#19---démo-09---les-directives-structurelles)
+20. [Récapitulatif des notions](#20---récapitulatif-des-notions)
 
 ---
 
@@ -98,22 +123,44 @@ src/
     ├── app.html                ← Template du composant racine
     ├── app.css                 ← Styles du composant racine
     ├── app.config.ts           ← Configuration de l'application
-    ├── app.routes.ts           ← Configuration du routing (vide pour l'instant)
+    ├── app.routes.ts           ← Configuration du routing
     ├── shared/
-    │   └── models/
-    │       └── user.model.ts   ← Interfaces TypeScript partagées
+    │   ├── models/
+    │   │   └── user.model.ts   ← Interfaces TypeScript partagées
+    │   └── pipes/
+    │       ├── chrono-pipe.ts          ← Pipe pour formater le chrono
+    │       ├── convert-to-dhms-pipe.ts ← Pipe pour convertir en jours/heures/min/sec
+    │       ├── sum-pipe.ts             ← Pipe pour sommer un tableau
+    │       └── temperature-pipe.ts     ← Pipe pour convertir les températures
     └── features/
         ├── home/
         │   └── home.ts
+        ├── layout/
+        │   └── navbar/
+        │       └── navbar.ts   ← Composant de navigation
+        ├── errors/
+        │   └── not-found/
+        │       └── not-found.ts ← Page 404
         ├── demonstrations/
+        │   ├── demonstrations.ts
+        │   ├── demonstrations.routes.ts
         │   ├── demo01-interpolation/
         │   ├── demo02-attribute-binding/
         │   ├── demo03-event-binding/
-        │   └── demo04-twoway-binding/
+        │   ├── demo04-twoway-binding/
+        │   ├── demo05-routing/
+        │   ├── demo06-pipes/
+        │   ├── demo07-custom-pipes/
+        │   ├── demo08-component-directives/
+        │   └── demo09-structural-directives/
         └── exercices/
+            ├── exercices.ts
+            ├── exercices.routes.ts
             ├── exo01/
             ├── exo02/
-            └── exo03/
+            ├── exo03/
+            ├── exo05/
+            └── exo06/
 ```
 
 ### Fichiers clés générés automatiquement
@@ -806,60 +853,822 @@ export class Exo03 {
 
 ---
 
-## Afficher les composants dans l'application
+## 13 - Démo 05 - Le Routing
 
-Pour que vos composants soient visibles, importez-les dans le composant racine.
+Le **routing** permet de naviguer entre différentes vues (composants) sans recharger la page. Angular utilise un système de routes qui mappe des URLs à des composants.
 
-### `app.ts`
+> Docs : [https://angular.dev/guide/routing](https://angular.dev/guide/routing)
+
+### Configuration des routes principales (`app.routes.ts`)
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { Demo01Interpolation } from './features/demonstrations/demo01-interpolation/demo01-interpolation';
-import { Demo02AttributeBinding } from './features/demonstrations/demo02-attribute-binding/demo02-attribute-binding';
-import { Demo03EventBinding } from './features/demonstrations/demo03-event-binding/demo03-event-binding';
-import { Demo04TwowayBinding } from './features/demonstrations/demo04-twoway-binding/demo04-twoway-binding';
-import { Exo01 } from './features/exercices/exo01/exo01';
-import { Exo02 } from './features/exercices/exo02/exo02';
-import { Exo03 } from './features/exercices/exo03/exo03';
+import { Routes } from '@angular/router';
+import { Home } from './features/home/home';
+import { Demonstrations } from './features/demonstrations/demonstrations';
+
+export const routes: Routes = [
+  {
+    path: 'home',
+    // Eager loading: chargement direct
+    component: Home
+  },
+
+  {
+    path: '',
+    redirectTo: 'home',
+    pathMatch: 'full'
+  },
+
+  {
+    path: "demonstrations",
+    component: Demonstrations,
+    // Lazy loading des routes enfants
+    loadChildren: () => import("./features/demonstrations/demonstrations.routes")
+      .then(r => r.routes)
+  },
+
+  {
+    path: 'exercices',
+    loadChildren: () => import("./features/exercices/exercices.routes")
+      .then(r => r.routes)
+  },
+
+  {
+    path: '**',
+    // Lazy loading: chargement à la demande
+    loadComponent: () => import("./features/errors/not-found/not-found")
+      .then(c => c.NotFound)
+  }
+];
+```
+
+### Routes enfants (`demonstrations.routes.ts`)
+
+```typescript
+import { Routes } from "@angular/router";
+
+export const routes: Routes = [
+  {
+    path: 'demo01',
+    title: 'Démonstration 01 - Interpolation',
+    loadComponent: () => import("./demo01-interpolation/demo01-interpolation")
+      .then(c => c.Demo01Interpolation)
+  },
+  {
+    path: 'demo02',
+    loadComponent: () => import("./demo02-attribute-binding/demo02-attribute-binding")
+      .then(c => c.Demo02AttributeBinding)
+  },
+  // ... autres démos
+];
+```
+
+### Composant Navbar avec RouterLink (`navbar.ts`)
+
+```typescript
+import { Component } from '@angular/core';
+import { RouterLink } from "@angular/router";
+
+@Component({
+  selector: 'app-navbar',
+  imports: [RouterLink],
+  templateUrl: './navbar.html',
+  styleUrl: './navbar.css',
+})
+export class Navbar { }
+```
+
+### Template de navigation (`navbar.html`)
+
+```html
+<nav>
+  <ul>
+    <li><a routerLink="">Home</a></li>
+    <li><a routerLink="/home">Home (avec /home)</a></li>
+    <li>
+      <a routerLink="/demonstrations">Démonstrations</a>
+      <ul>
+        <li><a routerLink="/demonstrations/demo01">Démo 01 - Interpolation</a></li>
+        <li><a routerLink="/demonstrations/demo02">Démo 02 - Attribute Binding</a></li>
+        <!-- ... -->
+      </ul>
+    </li>
+    <li>
+      <a routerLink="/exercices">Exercices</a>
+      <ul>
+        <li><a routerLink="/exercices/exo01">Exo 01 - Profil</a></li>
+        <!-- ... -->
+      </ul>
+    </li>
+  </ul>
+</nav>
+```
+
+### Composant racine avec RouterOutlet (`app.ts`)
+
+```typescript
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Navbar } from "./features/layout/navbar/navbar";
 
 @Component({
   selector: 'app-root',
-  imports: [
-    Demo01Interpolation,
-    Demo02AttributeBinding,
-    Demo03EventBinding,
-    Demo04TwowayBinding,
-    Exo01,
-    Exo02,
-    Exo03
-  ],
+  imports: [RouterOutlet, Navbar],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
-  protected readonly title = signal('Mon Projet Angular');
-}
+export class App { }
 ```
 
-### `app.html`
+### Template racine (`app.html`)
 
 ```html
-<h1>{{ title() }}</h1>
+<div class="container-fluid">
+  <div class="row">
+    <div class="menu col-3">
+      <app-navbar />
+    </div>
 
-<app-demo01-interpolation />
-<app-demo02-attribute-binding />
-<app-demo03-event-binding />
-<app-demo04-twoway-binding />
-<app-exo01 />
-<app-exo02 />
-<app-exo03 />
+    <main class="col">
+      <div class="header"></div>
+      <div class="content">
+        <router-outlet />
+      </div>
+      <div class="footer"></div>
+    </main>
+  </div>
+</div>
 ```
 
-> Chaque composant est utilisé via son **sélecteur** (défini dans `@Component({ selector: '...' })`).
+### Notions couvertes
+
+| Notion | Description |
+|--------|-------------|
+| `Routes` | Tableau de configuration des routes |
+| `path` | URL de la route |
+| `component` | Composant affiché (eager loading) |
+| `loadComponent` | Chargement à la demande (lazy loading) |
+| `loadChildren` | Chargement de routes enfants |
+| `redirectTo` | Redirection vers une autre route |
+| `pathMatch` | `'full'` ou `'prefix'` pour la correspondance |
+| `**` | Route wildcard (page 404) |
+| `RouterLink` | Directive pour les liens de navigation |
+| `RouterOutlet` | Emplacement où le composant routé s'affiche |
+| `title` | Titre de la page (onglet du navigateur) |
 
 ---
 
-## 13 - Récapitulatif des notions
+## 14 - Démo 06 - Les Pipes intégrés
+
+Les **pipes** transforment les données dans le template. Angular fournit plusieurs pipes intégrés.
+
+> Docs : [https://angular.dev/guide/pipes](https://angular.dev/guide/pipes)
+
+### Générer le composant
+
+```bash
+ng g c features/demonstrations/demo06-pipes --skip-tests
+```
+
+### Le composant (`demo06-pipes.ts`)
+
+```typescript
+import { CurrencyPipe, DatePipe, JsonPipe, LowerCasePipe, TitleCasePipe, UpperCasePipe } from '@angular/common';
+import { Component } from '@angular/core';
+import { User } from '../../../shared/models/user.model';
+
+@Component({
+  selector: 'app-demo06-pipes',
+  imports: [
+    LowerCasePipe,
+    UpperCasePipe,
+    TitleCasePipe,
+    CurrencyPipe,
+    DatePipe,
+    JsonPipe,
+  ],
+  templateUrl: './demo06-pipes.html',
+  styleUrl: './demo06-pipes.css',
+})
+export class Demo06Pipes {
+  now: Date = new Date();
+
+  personne: User = {
+    email: "quentin.geerts@bstorm.be",
+    lastname: "Geerts",
+    firstname: "Quentin"
+  };
+}
+```
+
+### Le template (`demo06-pipes.html`)
+
+```html
+<h2>Démonstration 06 - Les pipes (intégrés)</h2>
+
+<h3>Syntaxe: </h3>
+<code ngNonBindable>{{ expression | nomPipe }}</code>
+
+<h3>Exemples</h3>
+
+<h4>Chaînes de caractères:</h4>
+<ul>
+  <li>lowerCasePipe: {{ "couCou Les petitS LOUpS" | lowercase }}</li>
+  <li>upperCasePipe: {{ "couCou Les petitS LOUpS" | uppercase }}</li>
+  <li>titleCasePipe: {{ "couCou Les petitS LOUpS" | titlecase }}</li>
+</ul>
+
+<h4>Nombres:</h4>
+<ul>
+  <li>currencyPipe: {{ 1234.56 }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'JPY' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'symbol' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'symbol-narrow' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'code' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'symbol' : '6.1-1' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'EUR' : 'code' : '1.2-2' : 'fr-BE' }}</li>
+  <li>currencyPipe: {{ 1234.56 | currency : 'JPY' : 'symbol' : '' : 'ja-JP' }}</li>
+</ul>
+
+<p>Pareil pour DecimalPipe et PercentPipe. (plus simple: digitsInfo + locale)</p>
+
+<h4>Date:</h4>
+<ul>
+  <li>datePipe: {{ now }}</li>
+  <li>datePipe: {{ now | date }}</li>
+  <li>datePipe: {{ now | date : 'dd/MM/yyyy HH:mm:ss' }}</li>
+  <li>datePipe: {{ now | date : 'short' }}</li>
+  <li>datePipe: {{ now | date : 'dd/MM/yyyy HH:mm:ss' : '+0230' }}</li>
+  <li>datePipe: {{ now | date : 'EEEE dd MMMM yyyy HH:mm:ss' : '' : 'ja' }}</li>
+</ul>
+
+<h4>JSON:</h4>
+<ul>
+  <li>jsonPipe: {{ personne | json }}</li>
+</ul>
+```
+
+### Pipes intégrés les plus courants
+
+| Pipe | Syntaxe | Description |
+|------|---------|-------------|
+| `lowercase` | `{{ text \| lowercase }}` | Convertit en minuscules |
+| `uppercase` | `{{ text \| uppercase }}` | Convertit en majuscules |
+| `titlecase` | `{{ text \| titlecase }}` | Première lettre de chaque mot en majuscule |
+| `currency` | `{{ price \| currency:'EUR':'symbol' }}` | Formate en devise |
+| `date` | `{{ date \| date:'dd/MM/yyyy' }}` | Formate une date |
+| `json` | `{{ object \| json }}` | Convertit en JSON (debug) |
+| `decimal` | `{{ num \| number:'1.2-2' }}` | Formate un nombre décimal |
+| `percent` | `{{ num \| percent }}` | Formate en pourcentage |
+
+### Format des paramètres
+
+```
+{{ valeur | pipe : param1 : param2 : param3 }}
+```
+
+Pour `currency` : `{{ valeur | currency : 'CODE' : 'display' : 'digitsInfo' : 'locale' }}`
+
+---
+
+## 15 - Démo 07 - Les Custom Pipes
+
+Vous pouvez créer vos propres pipes pour des transformations personnalisées.
+
+> Docs : [https://angular.dev/guide/pipes/custom-pipes](https://angular.dev/guide/pipes/custom-pipes)
+
+### Générer un pipe
+
+```bash
+ng g pipe shared/pipes/convert-to-dhms --skip-tests
+```
+
+### Pipe ConvertToDhms (`convert-to-dhms-pipe.ts`)
+
+Convertit un nombre de secondes en format "X jours, X heures, X minutes, X secondes".
+
+```typescript
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'convertToDhms',
+})
+export class ConvertToDhmsPipe implements PipeTransform {
+
+  transform(value: number): string {
+
+    if (value < 0) return value.toString();
+
+    let nbDays = Math.floor(value / 86400);
+    value = value % 86400;
+
+    let nbHours = Math.floor(value / 3600);
+    value = value % 3600;
+
+    let nbMinutes = Math.floor(value / 60);
+    value = value % 60;
+
+    let format = "";
+
+    format += nbDays + " " + (nbDays > 1 ? "jours" : "jour") + ", ";
+    format += nbHours + " " + (nbHours > 1 ? "heures" : "heure") + ", ";
+    format += nbMinutes + " " + (nbMinutes > 1 ? "minutes" : "minute") + ", ";
+    format += value + " " + (value > 1 ? "secondes" : "seconde");
+
+    return format;
+  }
+}
+```
+
+### Pipe Sum (`sum-pipe.ts`)
+
+Calcule la somme d'un tableau de nombres avec un paramètre optionnel.
+
+```typescript
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'sum',
+})
+export class SumPipe implements PipeTransform {
+
+  transform(values: number[], initialValue: number): number {
+    return values.reduce((value, acc) => acc + value, initialValue);
+  }
+}
+```
+
+### Le composant (`demo07-custom-pipes.ts`)
+
+```typescript
+import { Component } from '@angular/core';
+import { ConvertToDhmsPipe } from "../../../shared/pipes/convert-to-dhms-pipe";
+import { SumPipe } from "../../../shared/pipes/sum-pipe";
+
+@Component({
+  selector: 'app-demo07-custom-pipes',
+  imports: [ConvertToDhmsPipe, SumPipe],
+  templateUrl: './demo07-custom-pipes.html',
+  styleUrl: './demo07-custom-pipes.css',
+})
+export class Demo07CustomPipes {
+  time: number = 123456;
+  values: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+}
+```
+
+### Le template (`demo07-custom-pipes.html`)
+
+```html
+<h2>Démonstration 07 - Les custom pipes</h2>
+
+<h3>Exemple:</h3>
+
+<h4>Convert To DHMS Pipe:</h4>
+<p>Valeur d'origine: {{ time }} </p>
+<p>Valeur convertie: {{ time | convertToDhms }}</p>
+
+<h4>Sum</h4>
+<p>Valeurs d'origine: {{ values }}</p>
+<p>Somme: {{ values | sum : 0 }}</p>
+```
+
+### Structure d'un Custom Pipe
+
+| Élément | Description |
+|---------|-------------|
+| `@Pipe({ name: 'xxx' })` | Décorateur qui définit le pipe |
+| `name` | Nom utilisé dans le template avec `\|` |
+| `implements PipeTransform` | Interface obligatoire |
+| `transform(value, ...args)` | Méthode qui effectue la transformation |
+
+---
+
+## 16 - Exercice 05 - Chronomètre formaté
+
+**Objectif** : Améliorer le chronomètre de l'exercice 03 en utilisant un custom pipe pour afficher le temps au format `MM:SS`.
+
+### Générer le pipe
+
+```bash
+ng g pipe shared/pipes/chrono --skip-tests
+```
+
+### Le pipe Chrono (`chrono-pipe.ts`)
+
+```typescript
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'chrono',
+})
+export class ChronoPipe implements PipeTransform {
+
+  transform(value: number): string {
+    let minutes = Math.floor(value / 60);
+    let seconds = value % 60;
+
+    let minFormat = minutes < 10 ? "0" + minutes : minutes;
+    let secondsFormat = seconds < 10 ? "0" + seconds : seconds;
+
+    return `${minFormat}:${secondsFormat}`;
+  }
+}
+```
+
+### Le composant (`exo05.ts`)
+
+```typescript
+import { Component, signal, WritableSignal } from '@angular/core';
+import { ChronoPipe } from "../../../shared/pipes/chrono-pipe";
+
+@Component({
+  selector: 'app-exo05',
+  imports: [ChronoPipe],
+  templateUrl: './exo05.html',
+  styleUrl: './exo05.css',
+})
+export class Exo05 {
+  chrono: WritableSignal<number> = signal(59);
+  timer?: number;
+
+  increment() {
+    this.chrono.update(value => value + 1);
+  }
+
+  startChrono() {
+    if (this.timer !== undefined) return;
+    this.timer = setInterval(() => this.increment(), 1000);
+  }
+
+  stopChrono() {
+    clearInterval(this.timer);
+    this.timer = undefined;
+  }
+
+  resetChrono() {
+    this.stopChrono();
+    this.chrono.set(0);
+  }
+}
+```
+
+### Le template (`exo05.html`)
+
+```html
+<h2>Exercice 05 - Le chronomètre formaté</h2>
+
+<p>Chrono: {{ chrono() | chrono }}</p>
+
+<button (click)="startChrono()" [disabled]="timer">Démarrer</button>
+<button (click)="stopChrono()" [disabled]="!timer">Mettre en pause</button>
+<button (click)="resetChrono()" [disabled]="!chrono()">Réinitialiser</button>
+```
+
+### Notions pratiquées
+
+- Création d'un custom pipe
+- Formatage avec padding (`"0" + value`)
+- Template literals (`` `${min}:${sec}` ``)
+- Utilisation d'un pipe sur un Signal
+
+---
+
+## 17 - Exercice 06 - Convertisseur de température
+
+**Objectif** : Créer un convertisseur de température utilisant un pipe avec plusieurs paramètres et des Signals pour la réactivité.
+
+### Générer le pipe
+
+```bash
+ng g pipe shared/pipes/temperature --skip-tests
+```
+
+### Le pipe Temperature (`temperature-pipe.ts`)
+
+```typescript
+import { Pipe, PipeTransform } from '@angular/core';
+
+export type TemperatureType = "celsius" | "fahrenheit" | "kelvin";
+
+@Pipe({
+  name: 'temperature',
+})
+export class TemperaturePipe implements PipeTransform {
+
+  transform(temperature: number, source: TemperatureType, destination: TemperatureType): string {
+
+    const unitFormat = destination === "celsius"
+      ? " °C" : destination === "fahrenheit"
+      ? " °F" : " K";
+
+    let result = 0;
+
+    if (source === destination) return temperature + unitFormat;
+
+    switch (source) {
+      case "celsius":
+        switch (destination) {
+          case 'fahrenheit':
+            result = (temperature * (9 / 5)) + 32;
+            break;
+          case 'kelvin':
+            result = temperature + 273.15;
+            break;
+        }
+        break;
+
+      case "fahrenheit":
+        switch (destination) {
+          case 'celsius':
+            result = (temperature - 32) * 5 / 9;
+            break;
+          case 'kelvin':
+            result = (temperature - 32) * 5 / 9 + 273.15;
+            break;
+        }
+        break;
+
+      case 'kelvin':
+        switch (destination) {
+          case 'celsius':
+            result = temperature - 273.15;
+            break;
+          case 'fahrenheit':
+            result = (temperature - 273.15) * (9/5) + 32;
+            break;
+        }
+        break;
+    }
+
+    return result.toFixed(2) + unitFormat;
+  }
+}
+```
+
+### Le composant (`exo06.ts`)
+
+```typescript
+import { Component, signal, WritableSignal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { TemperaturePipe, TemperatureType } from "../../../shared/pipes/temperature-pipe";
+
+@Component({
+  selector: 'app-exo06',
+  imports: [FormsModule, TemperaturePipe],
+  templateUrl: './exo06.html',
+  styleUrl: './exo06.css',
+})
+export class Exo06 {
+  temp: WritableSignal<number> = signal(0);
+  unitSrc: WritableSignal<TemperatureType> = signal("celsius");
+  unitDest: WritableSignal<TemperatureType> = signal("celsius");
+}
+```
+
+### Le template (`exo06.html`)
+
+```html
+<h2>Exercice 06 - Convertisseur de degré</h2>
+
+<div>
+  <label for="temp">Température</label>
+  <input type="number" name="temp" id="temp" [(ngModel)]="temp">
+</div>
+
+<div>
+  <label for="source">Source:</label>
+  <select name="source" id="source" [(ngModel)]="unitSrc">
+    <option value="celsius">Celsius</option>
+    <option value="fahrenheit">Fahrenheit</option>
+    <option value="kelvin">Kelvin</option>
+  </select>
+</div>
+
+<div>
+  <label for="destination">Destination:</label>
+  <select name="destination" id="destination" [(ngModel)]="unitDest">
+    <option value="celsius">Celsius</option>
+    <option value="fahrenheit">Fahrenheit</option>
+    <option value="kelvin">Kelvin</option>
+  </select>
+</div>
+
+<div>
+  <p>{{ temp() | temperature : unitSrc() : unitDest() }}</p>
+</div>
+```
+
+### Notions pratiquées
+
+- Pipe avec plusieurs paramètres
+- Type alias TypeScript (`type TemperatureType = ...`)
+- Export de types depuis un fichier
+- Signals avec `[(ngModel)]`
+- Lecture de Signals dans un pipe : `temp()`, `unitSrc()`, `unitDest()`
+
+---
+
+## 18 - Démo 08 - Les directives de composant
+
+Les **directives de composant** (`NgClass`, `NgStyle`) permettent d'appliquer dynamiquement des classes CSS ou des styles inline.
+
+> Docs : [https://angular.dev/guide/directives](https://angular.dev/guide/directives)
+
+### Générer le composant
+
+```bash
+ng g c features/demonstrations/demo08-component-directives --skip-tests
+```
+
+### Le composant (`demo08-component-directives.ts`)
+
+```typescript
+import { NgClass, NgStyle } from '@angular/common';
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-demo08-component-directives',
+  imports: [NgClass, NgStyle],
+  templateUrl: './demo08-component-directives.html',
+  styleUrl: './demo08-component-directives.css',
+})
+export class Demo08ComponentDirectives {
+  italic: boolean = false;
+  bold: boolean = false;
+  color: boolean = false;
+
+  toggleItalic() {
+    this.italic = !this.italic;
+  }
+
+  toggleBold() {
+    this.bold = !this.bold;
+  }
+
+  toggleColor() {
+    this.color = !this.color;
+  }
+}
+```
+
+### Le template (`demo08-component-directives.html`)
+
+```html
+<h2>Démonstration 08 - Les directives de composant</h2>
+
+<h3>Directive: NgClass</h3>
+
+<h4>Avec ngClass (nécessite un import)</h4>
+<p [ngClass]="{'fst-italic': italic, 'fw-bold': bold, 'text-primary': color}">
+  Lorem ipsum dolor sit amet consectetur adipisicing elit...
+</p>
+
+<h4>Sous forme de Property Binding (sans import)</h4>
+<p [class]="{'fst-italic': italic, 'fw-bold': bold, 'text-primary': color}">
+  Lorem ipsum dolor sit amet consectetur adipisicing elit...
+</p>
+
+<button (click)="toggleItalic()">Toggle italic</button> {{ italic }}
+<button (click)="toggleBold()">Toggle bold</button> {{ bold }}
+<button (click)="toggleColor()">Toggle color</button> {{ color }}
+
+
+<h3>Directive NgStyle</h3>
+
+<h4>Avec ngStyle (nécessite un import)</h4>
+<p [ngStyle]="{'color': 'green'}">
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit...
+</p>
+
+<h4>Sous forme de Property Binding (sans import)</h4>
+<p [style]="{'color': 'green'}">
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit...
+</p>
+```
+
+### Comparaison NgClass vs [class]
+
+| Directive | Import requis | Syntaxe |
+|-----------|---------------|---------|
+| `[ngClass]` | Oui (`NgClass`) | `[ngClass]="{'classe': condition}"` |
+| `[class]` | Non | `[class]="{'classe': condition}"` |
+
+### Comparaison NgStyle vs [style]
+
+| Directive | Import requis | Syntaxe |
+|-----------|---------------|---------|
+| `[ngStyle]` | Oui (`NgStyle`) | `[ngStyle]="{'prop': 'value'}"` |
+| `[style]` | Non | `[style]="{'prop': 'value'}"` |
+
+> **Astuce** : Depuis Angular 15+, préférez `[class]` et `[style]` qui ne nécessitent pas d'import.
+
+---
+
+## 19 - Démo 09 - Les directives structurelles
+
+Les **directives structurelles** modifient la structure du DOM en ajoutant ou supprimant des éléments.
+
+> Docs : [https://angular.dev/guide/directives/structural-directives](https://angular.dev/guide/directives/structural-directives)
+
+### Générer le composant
+
+```bash
+ng g c features/demonstrations/demo09-structural-directives --skip-tests
+```
+
+### Le composant (`demo09-structural-directives.ts`)
+
+```typescript
+import { NgIf } from '@angular/common';
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-demo09-structural-directives',
+  imports: [NgIf],
+  templateUrl: './demo09-structural-directives.html',
+  styleUrl: './demo09-structural-directives.css',
+})
+export class Demo09StructuralDirectives {
+  isShowed: boolean = true;
+
+  toggleShowed() {
+    this.isShowed = !this.isShowed;
+  }
+}
+```
+
+### Le template (`demo09-structural-directives.html`)
+
+```html
+<h2>Démonstration 09 - Les directives structurelles</h2>
+
+<h3>Directive *ngIf</h3>
+
+<h4>Ancienne version (sera retiré en Angular V22)</h4>
+
+<button (click)="toggleShowed()">Montrer / Cacher</button>
+
+<p *ngIf="isShowed">
+  Lorem ipsum dolor sit amet consectetur adipisicing elit...
+</p>
+
+<h4>Nouvelle version (à partir de la V18)</h4>
+
+@if (isShowed) {
+<p>
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit...
+</p>
+}
+```
+
+### Syntaxe Control Flow (Angular 17+)
+
+Angular introduit une nouvelle syntaxe de "control flow" plus lisible :
+
+| Ancienne syntaxe | Nouvelle syntaxe |
+|------------------|------------------|
+| `*ngIf="condition"` | `@if (condition) { }` |
+| `*ngIf="cond; else tpl"` | `@if (cond) { } @else { }` |
+| `*ngFor="let item of items"` | `@for (item of items; track item.id) { }` |
+| `*ngSwitch` | `@switch (value) { @case (x) { } }` |
+
+### Exemple avec @if / @else
+
+```html
+@if (isLoggedIn) {
+  <p>Bienvenue, {{ username }}</p>
+} @else {
+  <p>Veuillez vous connecter</p>
+}
+```
+
+### Exemple avec @for
+
+```html
+@for (item of items; track item.id) {
+  <li>{{ item.name }}</li>
+} @empty {
+  <li>Aucun élément</li>
+}
+```
+
+### Notions couvertes
+
+| Notion | Description |
+|--------|-------------|
+| `*ngIf` | Affiche/masque un élément selon une condition |
+| `*ngFor` | Répète un élément pour chaque item d'une liste |
+| `*ngSwitch` | Affiche un élément parmi plusieurs selon une valeur |
+| `@if` | Nouvelle syntaxe conditionnelle (Angular 17+) |
+| `@for` | Nouvelle syntaxe de boucle avec `track` obligatoire |
+| `@switch` | Nouvelle syntaxe switch/case |
+
+---
+
+## 20 - Récapitulatif des notions
 
 ### Data Binding
 
@@ -880,6 +1689,35 @@ export class App {
 | `templateUrl` / `template` | Template HTML externe ou inline |
 | `styleUrl` / `styles` | Styles CSS externes ou inline (encapsulés par défaut) |
 
+### Routing
+
+| Concept | Description |
+|---------|-------------|
+| `Routes` | Configuration des routes de l'application |
+| `RouterLink` | Directive pour la navigation par liens |
+| `RouterOutlet` | Zone d'affichage des composants routés |
+| `loadComponent` | Lazy loading d'un composant |
+| `loadChildren` | Lazy loading de routes enfants |
+| `path: '**'` | Route wildcard (page 404) |
+
+### Pipes
+
+| Concept | Description |
+|---------|-------------|
+| `@Pipe` | Décorateur qui définit un pipe |
+| `transform()` | Méthode de transformation |
+| Pipes intégrés | `lowercase`, `uppercase`, `date`, `currency`, `json` |
+| Custom pipe | Créer avec `ng g pipe nom` |
+| Paramètres | `{{ val \| pipe : param1 : param2 }}` |
+
+### Directives
+
+| Type | Exemples | Description |
+|------|----------|-------------|
+| Composant | `NgClass`, `NgStyle` | Modifie classes/styles |
+| Structurelle | `*ngIf`, `*ngFor`, `*ngSwitch` | Modifie le DOM |
+| Control Flow | `@if`, `@for`, `@switch` | Nouvelle syntaxe Angular 17+ |
+
 ### TypeScript essentiel
 
 | Concept | Exemple |
@@ -888,6 +1726,7 @@ export class App {
 | Tableaux | `string[]` ou `Array<string>` |
 | Interfaces | `interface User { name: string }` |
 | Types union | `"M" \| "F" \| "X"` |
+| Type alias | `type Unit = "celsius" \| "fahrenheit"` |
 | Optionnel | `age?: number` |
 | Assertion `!` | `value!: string` (sera assigné plus tard) |
 | Cast de type | `event.target as HTMLInputElement` |
@@ -914,6 +1753,7 @@ export class App {
 ng new mon-projet              # Créer un projet
 ng serve -o                    # Lancer le serveur + ouvrir le navigateur
 ng g c nom-composant           # Générer un composant
+ng g pipe nom-pipe             # Générer un pipe
 ng build                       # Compiler pour la production
 ```
 
@@ -924,6 +1764,9 @@ ng build                       # Compiler pour la production
 - [Documentation officielle Angular](https://angular.dev)
 - [Guide des composants](https://angular.dev/guide/components)
 - [Guide des templates et bindings](https://angular.dev/guide/templates)
+- [Guide du Routing](https://angular.dev/guide/routing)
+- [Guide des Pipes](https://angular.dev/guide/pipes)
+- [Guide des Directives](https://angular.dev/guide/directives)
 - [Guide des Signals](https://angular.dev/guide/signals)
 - [Guide des formulaires](https://angular.dev/guide/forms)
 - [Référence de la CLI Angular](https://angular.dev/tools/cli)
