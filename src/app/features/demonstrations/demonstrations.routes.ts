@@ -38,5 +38,10 @@ export const routes: Routes = [
     path: 'demo07',
     loadComponent: () => import("./demo07-custom-pipes/demo07-custom-pipes")
       .then(c => c.Demo07CustomPipes)
-  }
+  },
+  {
+    path: 'demo08',
+    loadComponent: () => import("./demo08-component-directives/demo08-component-directives")
+      .then(c => c.Demo08ComponentDirectives)
+  },
 ];

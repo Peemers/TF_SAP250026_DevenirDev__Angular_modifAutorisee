@@ -1,0 +1,30 @@
+<h2>Démonstration 08 - Les directives de composant</h2>
+
+<h3>Directive: NgClass</h3>
+
+<h4>⚠️ ngClass demande de faire un import de la directive</h4>
+<p [ngClass]="{'fst-italic': italic, 'fw-bold': bold, 'text-primary': color}">
+  Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem quisquam rerum, numquam dicta in sint? Perferendis error ab amet, fugiat perspiciatis quasi non incidunt aperiam tempore dicta ex reprehenderit fugit!
+</p>
+
+<h4>Sous forme de Property Binding</h4>
+<p [class]="{'fst-italic': italic, 'fw-bold': bold, 'text-primary': color}">
+  Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem quisquam rerum, numquam dicta in sint? Perferendis error ab amet, fugiat perspiciatis quasi non incidunt aperiam tempore dicta ex reprehenderit fugit!
+</p>
+
+<button (click)="toggleItalic()">Toggle italic</button> {{ italic }}
+<button (click)="toggleBold()">Toggle bold</button> {{ bold }}
+<button (click)="toggleColor()">Toggle color</button> {{ color }}
+
+
+<h3>Directive NgStyle</h3>
+
+<h4>⚠️ ngStyle demande de faire un import de la directive</h4>
+<p [ngStyle]="{'color': 'green'}">
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nemo, dignissimos laborum hic suscipit veritatis voluptatibus dicta harum facere? Eligendi delectus excepturi aspernatur a tempora voluptatibus tempore quo iusto molestias dolore!
+</p>
+
+<h4>Sous forme de Property Binding</h4>
+<p [style]="{'color': 'green'}">
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nemo, dignissimos laborum hic suscipit veritatis voluptatibus dicta harum facere? Eligendi delectus excepturi aspernatur a tempora voluptatibus tempore quo iusto molestias dolore!
+</p>
