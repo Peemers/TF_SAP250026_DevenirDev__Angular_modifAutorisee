@@ -43,3 +43,17 @@ Vous devez créer un composant Exercices.
 Vous devez créer un routing enfant pour les exercices.
 
 Vous ne devez utiliser la balise <router-outlet> dans le composant Exercices (dans l'affichage, les exercices (1-4) remplace la vue du composant Exercices)
+
+## Exercice 05 - Le chronomètre formaté
+
+Reprenez l'exercice du chronomètre en ajoutant un pipe customisé sur le nombre de secondes.
+Le format d'affichage doit être le suivant : 
+- mm:ss
+
+## Exercice 06 - Le convertisseur de degré
+
+Créer un programme qui permet d'encoder une température et de choisir la source et la destination de la conversion.
+
+Exemple:
+
+- 24.5 | convertisseurDegre : 'celsius' : 'fahrenheit'
