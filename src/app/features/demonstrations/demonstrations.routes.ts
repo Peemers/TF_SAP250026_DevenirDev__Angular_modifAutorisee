@@ -59,4 +59,9 @@ export const routes: Routes = [
     loadComponent: () => import("./demo11-communication-composants/demo11-communication-composants")
       .then(c => c.Demo11CommunicationComposants)
   },
+  {
+    path: 'demo12',
+    loadComponent: () => import("./demo12-services-di/demo12-services-di")
+      .then(c => c.Demo12ServicesDi)
+  },
 ];
