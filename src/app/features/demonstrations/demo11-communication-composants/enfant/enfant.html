@@ -1,3 +1,6 @@
 <h3>Composant enfant</h3>
 <p>Valeur provenant du parent: {{ valueFromParentDecorator }}</p>
 <p>Valeur provenant du parent: {{ valueFromParentSignal() }}</p>
+
+<input type="text" [(ngModel)]="value" (input)="sendToParent()">
+<input type="text" [(ngModel)]="valueSignal" (input)="sendToParent()">

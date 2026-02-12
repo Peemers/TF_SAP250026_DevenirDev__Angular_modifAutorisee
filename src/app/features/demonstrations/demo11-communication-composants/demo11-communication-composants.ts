@@ -11,5 +11,10 @@ import { FormsModule } from '@angular/forms';
 export class Demo11CommunicationComposants {
 
   value: string = "J'ai faim";
+  valueFromChild: string = "";
+  valueFromChildSignal: string = "";
 
+  receiveValue($event: string) {
+    this.valueFromChild = $event;
+  }
 }
