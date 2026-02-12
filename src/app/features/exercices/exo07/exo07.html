@@ -1,0 +1,12 @@
+<h2>Exercice 07 - Gestion des produits</h2>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <app-list-products [productsToDisplay]="products" />
+    </div>
+    <div class="col">
+      <app-add-product (createdProduct)="addToProducts($event)" />
+    </div>
+  </div>
+</div>
