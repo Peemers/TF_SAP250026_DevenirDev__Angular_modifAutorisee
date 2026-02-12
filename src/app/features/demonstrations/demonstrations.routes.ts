@@ -49,4 +49,9 @@ export const routes: Routes = [
     loadComponent: () => import("./demo09-structural-directives/demo09-structural-directives")
       .then(c => c.Demo09StructuralDirectives)
   },
+  {
+    path: 'demo10',
+    loadComponent: () => import("./demo10-custom-directives/demo10-custom-directives")
+      .then(c => c.Demo10CustomDirectives)
+  },
 ];
