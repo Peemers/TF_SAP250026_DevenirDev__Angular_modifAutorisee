@@ -57,3 +57,16 @@ Créer un programme qui permet d'encoder une température et de choisir la sourc
 Exemple:
 
 - 24.5 | convertisseurDegre : 'celsius' : 'fahrenheit'
+
+## Exercice 07 - Gestion des produits
+
+Créer une petite application qui permet de gérer une liste de produits.
+Vous devez créer deux sous-composants (enfants) pour afficher la liste et créer un produit.
+
+Le composant "ListProducts" doit recevoir la liste des produits depuis le parent et ensuite l'afficher sur la page (carte blanche pour affichage)
+
+Le composant "AddProduct" doit permettre de créer un produit et ensuite envoie le produit au parent qui l'ajoute à la liste.
+
+Vous devez créer un modèle (interface) nommé Product qui possède les champs suivants :
+- name: string
+- price: number
