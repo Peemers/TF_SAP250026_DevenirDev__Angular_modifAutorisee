@@ -1,0 +1,13 @@
+<h2>Démonstration 11 - Communication entre composants</h2>
+
+<div>
+  <h3>Composant parent</h3>
+  <input type="text" [(ngModel)]="value">
+</div>
+
+<div>
+  <app-enfant 
+    [valueFromParentDecorator]="value" 
+    [valueFromParentSignal]="value"
+  />
+</div>
