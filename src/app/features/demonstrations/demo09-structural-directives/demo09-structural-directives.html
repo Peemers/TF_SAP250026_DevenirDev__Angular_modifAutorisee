@@ -6,10 +6,14 @@
 
 <button (click)="toggleShowed()">Montrer / Cacher</button>
 
-<p *ngIf="isShowed">
+<p *ngIf="isShowed; else elseblock">
   Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro animi dolore quibusdam? Ad id ipsa sed iure cum dolore
   dolorem veritatis, amet, voluptas eos possimus tempora praesentium illo mollitia a?
 </p>
+
+<ng-template #elseblock>
+  <p>Dans le cas du else</p>
+</ng-template>
 
 <h4>Nouvelle version (⚠️ à partir de la V18)</h4>
 
@@ -19,3 +23,48 @@
   tempora a exercitationem, quam delectus sit! Dolor molestiae quod dolorem officiis ab quisquam cumque!
 </p>
 }
+@else {
+<p>
+  Dans le cas du else
+</p>
+}
+
+<h3>Directive *ngFor</h3>
+
+<h4>Ancienne version</h4>
+
+<table>
+  <tr>
+    <th>Index</th>
+    <th>Email</th>
+    <th>Firstname</th>
+    <th>Lastname</th>
+  </tr>
+  <tr *ngFor="let user of users; index as i; first as isFirst; last as isLast; odd as isOdd; even as isEven"
+    [ngClass]="{'fw-bold': isFirst, 'fst-italic': isLast, 'text-primary': isOdd}">
+    <td>{{ i }}</td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.firstname }}</td>
+    <td>{{ user.lastname }}</td>
+  </tr>
+</table>
+
+<h4>Nouvelle version</h4>
+
+<table>
+  <tr>
+    <th>Index</th>
+    <th>Email</th>
+    <th>Firstname</th>
+    <th>Lastname</th>
+  </tr>
+  @for (user of users; track user.email) {
+  <tr [class]="{'fw-bold': $first, 'fst-italic': $last, 'text-secondary': $odd}">
+    <td>{{ $index }}</td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.firstname }}</td>
+    <td>{{ user.lastname }}</td>
+  </tr>
+  }
+
+</table>
