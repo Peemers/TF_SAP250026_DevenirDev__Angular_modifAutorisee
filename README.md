@@ -45,7 +45,11 @@ Puis fermez et rouvrez votre terminal.
 17. [Exercice 06 - Convertisseur de température](#17---exercice-06---convertisseur-de-température)
 18. [Démo 08 - Les directives de composant](#18---démo-08---les-directives-de-composant)
 19. [Démo 09 - Les directives structurelles](#19---démo-09---les-directives-structurelles)
-20. [Récapitulatif des notions](#20---récapitulatif-des-notions)
+20. [Démo 10 - Les directives personnalisées](#20---démo-10---les-directives-personnalisées)
+21. [Démo 11 - Communication entre composants](#21---démo-11---communication-entre-composants)
+22. [Exercice 07 - Gestion des produits](#22---exercice-07---gestion-des-produits)
+23. [Démo 12 - Les services et l'injection de dépendances](#23---démo-12---les-services-et-linjection-de-dépendances)
+24. [Récapitulatif des notions](#24---récapitulatif-des-notions)
 
 ---
 
@@ -124,9 +128,15 @@ src/
     ├── app.css                 ← Styles du composant racine
     ├── app.config.ts           ← Configuration de l'application
     ├── app.routes.ts           ← Configuration du routing
+    ├── core/
+    │   └── services/
+    │       └── authentication.ts       ← Service d'authentification (DI)
     ├── shared/
     │   ├── models/
-    │   │   └── user.model.ts   ← Interfaces TypeScript partagées
+    │   │   ├── user.model.ts           ← Interface User partagée
+    │   │   └── product.model.ts        ← Interface Product partagée
+    │   ├── directives/
+    │   │   └── highlight.ts            ← Directive personnalisée de surlignage
     │   └── pipes/
     │       ├── chrono-pipe.ts          ← Pipe pour formater le chrono
     │       ├── convert-to-dhms-pipe.ts ← Pipe pour convertir en jours/heures/min/sec
@@ -152,7 +162,11 @@ src/
         │   ├── demo06-pipes/
         │   ├── demo07-custom-pipes/
         │   ├── demo08-component-directives/
-        │   └── demo09-structural-directives/
+        │   ├── demo09-structural-directives/
+        │   ├── demo10-custom-directives/
+        │   ├── demo11-communication-composants/
+        │   │   └── enfant/             ← Composant enfant (Input/Output)
+        │   └── demo12-services-di/
         └── exercices/
             ├── exercices.ts
             ├── exercices.routes.ts
@@ -160,7 +174,10 @@ src/
             ├── exo02/
             ├── exo03/
             ├── exo05/
-            └── exo06/
+            ├── exo06/
+            └── exo07/
+                ├── add-product/        ← Composant enfant (formulaire)
+                └── list-products/      ← Composant enfant (liste)
 ```
 
 ### Fichiers clés générés automatiquement
@@ -1668,7 +1685,637 @@ Angular introduit une nouvelle syntaxe de "control flow" plus lisible :
 
 ---
 
-## 20 - Récapitulatif des notions
+## 20 - Démo 10 - Les directives personnalisées
+
+Une **directive personnalisée** (custom directive) permet de créer un comportement réutilisable que vous pouvez appliquer à n'importe quel élément HTML. Contrairement à un composant, une directive n'a pas de template.
+
+> Docs : [https://angular.dev/guide/directives/attribute-directives](https://angular.dev/guide/directives/attribute-directives)
+
+### Générer la directive
+
+```bash
+ng g directive shared/directives/highlight --skip-tests
+```
+
+### La directive (`shared/directives/highlight.ts`)
+
+```typescript
+import { Directive, effect, ElementRef, HostListener, inject, input, Input, signal } from '@angular/core';
+
+@Directive({
+  selector: '[appHighlight]',
+  // Nouvelle façon : déclarer les événements et bindings dans "host"
+  host: {
+    // Mapping des événements
+    "(mouseleave)": "onMouseLeave()",
+
+    // Mapping des classes CSS
+    "[class.fst-italic]": 'italic()'
+  }
+})
+export class Highlight {
+
+  // Injection de l'élément DOM via inject()
+  element: ElementRef = inject(ElementRef);
+
+  defaultHighlight = "yellow";
+
+  // Ancienne version : @Input() avec décorateur
+  @Input() appHighlight: string = "";
+
+  // Nouvelle version : input() comme fonction (signal-based)
+  defaultColor = input("transparent");
+  italic = input(true);
+
+  constructor() {
+    // effect() réagit aux changements de signaux
+    effect(() => {
+      console.log("Italic: ", this.italic());
+    });
+  }
+
+  // Ancienne façon : @HostListener pour écouter des événements DOM
+  @HostListener("mouseenter")
+  onMouseEnter() {
+    this.element.nativeElement.style.backgroundColor = this.appHighlight || this.defaultHighlight;
+  }
+
+  // Nouvelle façon : déclaré dans le bloc "host" du décorateur
+  onMouseLeave() {
+    this.element.nativeElement.style.backgroundColor = this.defaultColor();
+  }
+}
+```
+
+### Générer le composant de démonstration
+
+```bash
+ng g c features/demonstrations/demo10-custom-directives --skip-tests
+```
+
+### Le composant (`demo10-custom-directives.ts`)
+
+```typescript
+import { Component, signal, WritableSignal } from '@angular/core';
+import { Highlight } from "../../../shared/directives/highlight";
+
+@Component({
+  selector: 'app-demo10-custom-directives',
+  imports: [Highlight],
+  templateUrl: './demo10-custom-directives.html',
+  styleUrl: './demo10-custom-directives.css',
+})
+export class Demo10CustomDirectives {
+
+  italic: WritableSignal<boolean> = signal(false);
+
+  onClick() {
+    this.italic.update(value => !value);
+  }
+}
+```
+
+### Le template (`demo10-custom-directives.html`)
+
+```html
+<h2>Démonstration 10 - Les directives personnalisées</h2>
+
+<!-- Utilisation avec une couleur personnalisée -->
+<p appHighlight="blue">
+  Ce texte sera surligné en bleu au survol.
+</p>
+
+<!-- Utilisation avec une couleur par défaut personnalisée au départ -->
+<p appHighlight defaultColor="chartreuse">
+  Ce texte sera surligné en jaune au survol, puis chartreuse quand la souris quitte.
+</p>
+
+<!-- Utilisation avec binding sur italic -->
+<p appHighlight [italic]="italic()">
+  Ce texte peut devenir italique dynamiquement.
+</p>
+
+<button (click)="onClick()">Italic ?</button>
+```
+
+### Ce qu'il faut retenir
+
+| Concept | Description |
+|---------|-------------|
+| `@Directive` | Décorateur qui crée une directive (sans template) |
+| `selector: '[appHighlight]'` | Sélecteur d'attribut (entre crochets) |
+| `ElementRef` | Référence vers l'élément DOM natif |
+| `inject(ElementRef)` | Injection de dépendance via la fonction `inject()` |
+| `@HostListener("event")` | Ancienne façon d'écouter les événements de l'hôte |
+| `host: { "(event)": "fn()" }` | Nouvelle façon de déclarer les événements |
+| `host: { "[class.x]": "expr" }` | Binding de classe CSS sur l'élément hôte |
+| `input()` | Nouvelle façon de déclarer un Input (signal-based) |
+| `effect()` | Exécute du code quand un signal change de valeur |
+
+### Différences entre Composant et Directive
+
+| | Composant | Directive |
+|-|-----------|-----------|
+| Template | Oui (`templateUrl`) | Non |
+| Décorateur | `@Component` | `@Directive` |
+| Sélecteur | Élément (`app-xxx`) | Attribut (`[appXxx]`) |
+| Usage | Brique visuelle | Comportement réutilisable |
+
+---
+
+## 21 - Démo 11 - Communication entre composants
+
+La **communication entre composants** est essentielle pour construire des applications modulaires. Angular propose deux mécanismes principaux :
+- **`@Input()` / `input()`** : le parent envoie des données vers l'enfant
+- **`@Output()` / `output()`** : l'enfant envoie des événements vers le parent
+
+> Docs : [https://angular.dev/guide/components/inputs](https://angular.dev/guide/components/inputs) et [https://angular.dev/guide/components/outputs](https://angular.dev/guide/components/outputs)
+
+### Générer les composants
+
+```bash
+ng g c features/demonstrations/demo11-communication-composants --skip-tests
+ng g c features/demonstrations/demo11-communication-composants/enfant --skip-tests
+```
+
+### Le composant enfant (`enfant/enfant.ts`)
+
+C'est le composant enfant qui déclare ses entrées (`input`) et ses sorties (`output`) :
+
+```typescript
+import { Component, EventEmitter, Input, input, InputSignal, output, Output, OutputEmitterRef, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-enfant',
+  imports: [FormsModule],
+  templateUrl: './enfant.html',
+  styleUrl: './enfant.css',
+})
+export class Enfant {
+
+  // ====== RECEVOIR des données du parent ======
+
+  // Ancienne façon : décorateur @Input()
+  @Input() valueFromParentDecorator: string = "";
+
+  // Nouvelle façon : fonction input() (signal-based)
+  valueFromParentSignal: InputSignal<string> = input("");
+
+  // ====== ENVOYER des données au parent ======
+
+  // Ancienne façon : décorateur @Output() + EventEmitter
+  @Output() valueEmitted: EventEmitter<string> = new EventEmitter();
+
+  // Nouvelle façon : fonction output()
+  valueEmittedSignal: OutputEmitterRef<string> = output();
+
+  // Valeurs locales
+  value = "";
+  valueSignal = signal("");
+
+  sendToParent() {
+    // Émettre via l'ancienne façon
+    this.valueEmitted.emit(this.value);
+    // Émettre via la nouvelle façon
+    this.valueEmittedSignal.emit(this.valueSignal());
+  }
+}
+```
+
+### Le template enfant (`enfant/enfant.html`)
+
+```html
+<h3>Composant enfant</h3>
+
+<!-- Lecture des valeurs reçues du parent -->
+<p>Valeur provenant du parent (décorateur): {{ valueFromParentDecorator }}</p>
+<p>Valeur provenant du parent (signal): {{ valueFromParentSignal() }}</p>
+
+<!-- Champs pour envoyer des données au parent -->
+<input type="text" [(ngModel)]="value" (input)="sendToParent()">
+<input type="text" [(ngModel)]="valueSignal" (input)="sendToParent()">
+```
+
+### Le composant parent (`demo11-communication-composants.ts`)
+
+```typescript
+import { Component } from '@angular/core';
+import { Enfant } from "./enfant/enfant";
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-demo11-communication-composants',
+  imports: [FormsModule, Enfant],
+  templateUrl: './demo11-communication-composants.html',
+  styleUrl: './demo11-communication-composants.css',
+})
+export class Demo11CommunicationComposants {
+
+  value: string = "J'ai faim";
+  valueFromChild: string = "";
+  valueFromChildSignal: string = "";
+
+  receiveValue($event: string) {
+    this.valueFromChild = $event;
+  }
+}
+```
+
+### Le template parent (`demo11-communication-composants.html`)
+
+```html
+<h2>Démonstration 11 - Communication entre composants</h2>
+
+<div>
+  <h3>Composant parent</h3>
+  <input type="text" [(ngModel)]="value">
+  <p>Message provenant de l'enfant: {{ valueFromChild }}</p>
+  <p>Message provenant de l'enfant (signal): {{ valueFromChildSignal }}</p>
+</div>
+
+<div>
+  <!-- Utilisation du composant enfant avec bindings -->
+  <app-enfant
+    [valueFromParentDecorator]="value"
+    [valueFromParentSignal]="value"
+    (valueEmitted)="valueFromChild = $event"
+    (valueEmittedSignal)="valueFromChildSignal = $event"
+  />
+</div>
+```
+
+
+### Comparaison ancienne vs nouvelle syntaxe
+
+| Action | Ancienne syntaxe (décorateurs) | Nouvelle syntaxe (signal-based) |
+|--------|-------------------------------|-------------------------------|
+| Recevoir du parent | `@Input() prop: string = ""` | `prop = input("")` |
+| Type du signal d'input | — | `InputSignal<string>` |
+| Lire la valeur | `this.prop` | `this.prop()` (comme un signal) |
+| Envoyer au parent | `@Output() evt = new EventEmitter<string>()` | `evt = output<string>()` |
+| Type de l'output | `EventEmitter<T>` | `OutputEmitterRef<T>` |
+| Émettre | `this.evt.emit(value)` | `this.evt.emit(value)` |
+
+### Notions couvertes
+
+| Notion | Description |
+|--------|-------------|
+| `@Input()` | Décorateur pour recevoir des données du parent |
+| `input()` | Fonction signal-based pour recevoir des données du parent |
+| `@Output()` | Décorateur pour émettre des événements vers le parent |
+| `output()` | Fonction signal-based pour émettre des événements |
+| `EventEmitter<T>` | Classe pour émettre des événements typés |
+| `OutputEmitterRef<T>` | Type retourné par `output()` |
+| `.emit(value)` | Envoie une valeur au parent |
+| `(event)="handler($event)"` | Écoute un événement émis par l'enfant |
+
+---
+
+## 22 - Exercice 07 - Gestion des produits
+
+**Objectif** : Mettre en pratique la communication entre composants en créant une application de gestion de produits avec un composant parent, un composant liste et un composant formulaire.
+
+### Créer le modèle Product
+
+Créez le fichier `src/app/shared/models/product.model.ts` :
+
+```typescript
+export interface Product {
+  name: string;
+  price: number;
+}
+```
+
+### Générer les composants
+
+```bash
+ng g c features/exercices/exo07 --skip-tests
+ng g c features/exercices/exo07/list-products --skip-tests
+ng g c features/exercices/exo07/add-product --skip-tests
+```
+
+### Le composant parent (`exo07.ts`)
+
+Le parent gère la liste de produits et orchestre la communication entre les enfants :
+
+```typescript
+import { Component } from '@angular/core';
+import { ListProducts } from "./list-products/list-products";
+import { AddProduct } from "./add-product/add-product";
+import { Product } from '../../../shared/models/product.model';
+
+@Component({
+  selector: 'app-exo07',
+  imports: [ListProducts, AddProduct],
+  templateUrl: './exo07.html',
+  styleUrl: './exo07.css',
+})
+export class Exo07 {
+
+  products: Product[] = [
+    { name: 'Pomme', price: 1.2 },
+    { name: 'Poire', price: 1.23 },
+    { name: 'Cerise', price: 3.23 },
+  ];
+
+  addToProducts($event: Product) {
+    this.products.push($event);
+  }
+}
+```
+
+### Le template parent (`exo07.html`)
+
+```html
+<h2>Exercice 07 - Gestion des produits</h2>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <!-- La liste reçoit les produits via @Input -->
+      <app-list-products [productsToDisplay]="products" />
+    </div>
+    <div class="col">
+      <!-- Le formulaire émet un produit via @Output -->
+      <app-add-product (createdProduct)="addToProducts($event)" />
+    </div>
+  </div>
+</div>
+```
+
+### Le composant liste (`list-products/list-products.ts`)
+
+Ce composant **reçoit** les produits du parent via `input()` :
+
+```typescript
+import { Component, input } from '@angular/core';
+import { Product } from '../../../../shared/models/product.model';
+import { CurrencyPipe } from '@angular/common';
+
+@Component({
+  selector: 'app-list-products',
+  imports: [CurrencyPipe],
+  templateUrl: './list-products.html',
+  styleUrl: './list-products.css',
+})
+export class ListProducts {
+
+  // input() signal-based pour recevoir les données du parent
+  productsToDisplay = input<Product[]>([]);
+}
+```
+
+### Le template liste (`list-products/list-products.html`)
+
+```html
+<h3>Liste des produits:</h3>
+
+<table class="table table-striped table-hover">
+  <tr>
+    <th>Nom</th>
+    <th>Prix</th>
+  </tr>
+  @for (product of productsToDisplay(); track product.name) {
+  <tr>
+    <td>{{ product.name }}</td>
+    <td>{{ product.price | currency : 'EUR' : 'symbol' : '1.2-2' : 'fr-BE' }}</td>
+  </tr>
+  }
+  @empty {
+    <tr>
+      <td colspan="2">Aucun produit présent.</td>
+    </tr>
+  }
+</table>
+```
+
+### Le composant formulaire (`add-product/add-product.ts`)
+
+Ce composant **émet** un nouveau produit vers le parent via `output()` :
+
+```typescript
+import { Component, output, OutputEmitterRef, signal, WritableSignal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Product } from '../../../../shared/models/product.model';
+
+@Component({
+  selector: 'app-add-product',
+  imports: [FormsModule],
+  templateUrl: './add-product.html',
+  styleUrl: './add-product.css',
+})
+export class AddProduct {
+
+  // Output pour envoyer le produit créé au parent
+  createdProduct: OutputEmitterRef<Product> = output<Product>();
+
+  // Propriétés du formulaire (signals)
+  productName: WritableSignal<string> = signal("");
+  productPrice = signal(0);
+
+  createProduct() {
+    const newProduct: Product = {
+      name: this.productName(),
+      price: this.productPrice()
+    };
+
+    // Réinitialiser le formulaire
+    this.productName.set("");
+    this.productPrice.set(0);
+
+    // Émettre le produit au parent
+    this.createdProduct.emit(newProduct);
+  }
+}
+```
+
+### Le template formulaire (`add-product/add-product.html`)
+
+```html
+<h3>Ajouter un produit :</h3>
+<div class="mb-3">
+  <label class="form-label" for="product-name">Nom du produit:</label>
+  <input class="form-control" type="text" name="product-name" id="product-name" [(ngModel)]="productName">
+</div>
+<div class="mb-3">
+  <label class="form-label" for="product-price">Prix du produit:</label>
+  <input class="form-control" type="text" name="product-price" id="product-price" [(ngModel)]="productPrice">
+</div>
+
+<div class="mb-3">
+  <button class="btn btn-dark" (click)="createProduct()">Créer le produit</button>
+</div>
+```
+
+### Notions pratiquées
+
+- Communication parent → enfant avec `input()` (signal-based)
+- Communication enfant → parent avec `output()` et `.emit()`
+- Architecture en composants imbriqués (parent + 2 enfants)
+- `@for` avec `track` pour itérer sur un tableau
+- `@empty` pour gérer le cas d'une liste vide
+- `CurrencyPipe` pour formater les prix
+- Signals dans les formulaires avec `[(ngModel)]`
+
+---
+
+## 23 - Démo 12 - Les services et l'injection de dépendances
+
+Un **service** est une classe TypeScript qui encapsule de la logique métier ou des données partagées entre composants. Angular utilise l'**injection de dépendances** (DI) pour fournir automatiquement les instances de services aux composants qui en ont besoin.
+
+> Docs : [https://angular.dev/guide/di](https://angular.dev/guide/di)
+
+### Pourquoi utiliser un service ?
+
+| Problème | Solution avec un service |
+|----------|-------------------------|
+| Dupliquer la même logique dans plusieurs composants | Centraliser dans un service |
+| Partager des données entre composants non liés | Le service sert de "source de vérité" |
+| Séparer la logique métier de l'affichage | Le composant gère l'UI, le service gère la logique |
+
+### Générer un service
+
+```bash
+ng g service core/services/authentication --skip-tests
+```
+
+> **Convention** : Les services se placent dans le dossier `core/services/`.
+
+### Le service (`core/services/authentication.ts`)
+
+```typescript
+import { Injectable, signal } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root',  // Disponible partout dans l'application (singleton)
+})
+export class Authentication {
+
+  // Signal privé pour stocker l'état de connexion
+  private isConnected = signal(true);
+
+  // Getter qui expose le signal en lecture seule
+  get status() {
+    return this.isConnected;
+  }
+
+  login() {
+    this.isConnected.set(true);
+  }
+
+  logout() {
+    this.isConnected.set(false);
+  }
+}
+```
+
+### Générer le composant de démonstration
+
+```bash
+ng g c features/demonstrations/demo12-services-di --skip-tests
+```
+
+### Le composant (`demo12-services-di.ts`)
+
+```typescript
+import { Component, inject } from '@angular/core';
+import { Authentication } from '../../../core/services/authentication';
+
+@Component({
+  selector: 'app-demo12-services-di',
+  imports: [],
+  templateUrl: './demo12-services-di.html',
+  styleUrl: './demo12-services-di.css',
+})
+export class Demo12ServicesDi {
+
+  // Injection du service via inject()
+  private _authenticationService: Authentication = inject(Authentication);
+
+  // Lecture de l'état depuis le service
+  isConnected: boolean = this._authenticationService.status();
+
+  login() {
+    this._authenticationService.login();
+    this.isConnected = this._authenticationService.status();
+  }
+
+  logout() {
+    this._authenticationService.logout();
+    this.isConnected = this._authenticationService.status();
+  }
+}
+```
+
+### Le template (`demo12-services-di.html`)
+
+```html
+<h2>Démonstration 12 - Services et DI</h2>
+
+<div class="container-fluid">
+  <p>État de connexion: {{ isConnected }}</p>
+  <button (click)="login()" class="btn btn-dark">Se connecter</button>
+  <button (click)="logout()" class="btn btn-dark">Se déconnecter</button>
+</div>
+```
+
+### Utilisation du service dans la Navbar
+
+Le même service peut être utilisé dans un autre composant. Comme il est `providedIn: 'root'`, c'est **la même instance** (singleton) :
+
+```typescript
+// navbar.ts
+import { Component, inject } from '@angular/core';
+import { RouterLink } from "@angular/router";
+import { Authentication } from '../../../core/services/authentication';
+
+@Component({
+  selector: 'app-navbar',
+  imports: [RouterLink],
+  templateUrl: './navbar.html',
+  styleUrl: './navbar.css',
+})
+export class Navbar {
+  private _authenticationService: Authentication = inject(Authentication);
+  isConnected: boolean = this._authenticationService.status();
+}
+```
+
+```html
+<!-- navbar.html (extrait) -->
+<div>
+  État de connexion: {{ isConnected }}
+</div>
+```
+
+> Quand on se connecte/déconnecte dans la démo 12, l'état est aussi visible dans la navbar car le service est partagé !
+
+### Ce qu'il faut retenir
+
+| Concept | Description |
+|---------|-------------|
+| `@Injectable()` | Décorateur qui marque une classe comme injectable |
+| `providedIn: 'root'` | Le service est un **singleton** disponible partout |
+| `inject(Service)` | Injecte une instance du service (nouvelle façon) |
+| `constructor(private svc: Service)` | Injection via le constructeur (ancienne façon) |
+| Singleton | Une seule instance partagée dans toute l'application |
+| Séparation des responsabilités | Composant = UI, Service = logique métier/données |
+
+### Injection de dépendances : comment ça marche ?
+
+```
+1. Le composant demande un service  →  inject(Authentication)
+2. Angular cherche un fournisseur   →  providedIn: 'root'
+3. Angular crée OU réutilise        →  Singleton (une seule instance)
+   l'instance du service
+4. L'instance est injectée           →  this._authenticationService
+   dans le composant
+```
+
+---
+
+## 24 - Récapitulatif des notions
 
 ### Data Binding
 
@@ -1717,6 +2364,23 @@ Angular introduit une nouvelle syntaxe de "control flow" plus lisible :
 | Composant | `NgClass`, `NgStyle` | Modifie classes/styles |
 | Structurelle | `*ngIf`, `*ngFor`, `*ngSwitch` | Modifie le DOM |
 | Control Flow | `@if`, `@for`, `@switch` | Nouvelle syntaxe Angular 17+ |
+| Personnalisée | `@Directive` + `[appXxx]` | Comportement réutilisable sur un élément |
+
+### Communication entre composants
+
+| Direction | Ancienne syntaxe | Nouvelle syntaxe |
+|-----------|-----------------|------------------|
+| Parent → Enfant | `@Input() prop` | `prop = input()` |
+| Enfant → Parent | `@Output() evt = new EventEmitter()` | `evt = output()` |
+
+### Services et Injection de dépendances
+
+| Concept | Description |
+|---------|-------------|
+| `@Injectable()` | Décorateur qui marque une classe comme injectable |
+| `providedIn: 'root'` | Singleton disponible dans toute l'application |
+| `inject(Service)` | Injecte une instance (nouvelle façon) |
+| `constructor(private svc: Service)` | Injection via constructeur (ancienne façon) |
 
 ### TypeScript essentiel
 
@@ -1754,6 +2418,8 @@ ng new mon-projet              # Créer un projet
 ng serve -o                    # Lancer le serveur + ouvrir le navigateur
 ng g c nom-composant           # Générer un composant
 ng g pipe nom-pipe             # Générer un pipe
+ng g directive nom-directive   # Générer une directive
+ng g service nom-service       # Générer un service
 ng build                       # Compiler pour la production
 ```
 
@@ -1767,6 +2433,10 @@ ng build                       # Compiler pour la production
 - [Guide du Routing](https://angular.dev/guide/routing)
 - [Guide des Pipes](https://angular.dev/guide/pipes)
 - [Guide des Directives](https://angular.dev/guide/directives)
+- [Guide des Directives d'attribut](https://angular.dev/guide/directives/attribute-directives)
 - [Guide des Signals](https://angular.dev/guide/signals)
+- [Guide des Inputs](https://angular.dev/guide/components/inputs)
+- [Guide des Outputs](https://angular.dev/guide/components/outputs)
+- [Guide de l'injection de dépendances](https://angular.dev/guide/di)
 - [Guide des formulaires](https://angular.dev/guide/forms)
 - [Référence de la CLI Angular](https://angular.dev/tools/cli)
