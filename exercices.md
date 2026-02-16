@@ -70,3 +70,10 @@ Le composant "AddProduct" doit permettre de créer un produit et ensuite envoie 
 Vous devez créer un modèle (interface) nommé Product qui possède les champs suivants :
 - name: string
 - price: number
+
+## Exercice 08 - Gestion des produits (services)
+
+Reprenez l'exercice précédent et ajouter la notion de service.
+La logique métier et les données doivent se situer dans la classe du service.
+
+Les composants doivent simplement injecter le service et le consommer.
